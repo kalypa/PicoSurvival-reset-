@@ -8,7 +8,7 @@ public class CameraCtrl : MonoBehaviour
     public GameObject _objTarget = null;
     private Transform _objTargetTransform = null;
 
-    public float _distance = 6;
+    public float _distance = 3;
 
     public float _height = 1.75f;
 

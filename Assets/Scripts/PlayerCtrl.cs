@@ -42,8 +42,8 @@ public class PlayerCtrl : MonoBehaviour
     {
         Move();
         SetGravity();
-        BodyDirectChange();
         CkAnimationState();
+        BodyDirectChange();
         InputAttackCtrll();
         AtkAnimationCtrl();
         AtkComponentCtrl();
@@ -51,22 +51,23 @@ public class PlayerCtrl : MonoBehaviour
 
     void Move()
     {
+        if (stopMove == true)
+        {
+            return;
+        }
+
         Transform CameraTransform = Camera.main.transform;
-
         Vector3 forward = CameraTransform.TransformDirection(Vector3.forward);
-        forward.y = 0;
+        forward.y = 0.0f;
 
-        Vector3 right = new(forward.z, 0.0f, -forward.x);
-
+        Vector3 right = new Vector3(forward.z, 0.0f, -forward.x);
         float vertical = Input.GetAxisRaw("Vertical");
         float horizontal = Input.GetAxisRaw("Horizontal");
 
         Vector3 targetDirect = horizontal * right + vertical * forward;
 
         moveDirect = Vector3.RotateTowards(moveDirect, targetDirect, directRotateSpd * Mathf.Deg2Rad * Time.deltaTime, 1000.0f);
-        
         moveDirect = moveDirect.normalized;
-
         float spd = movespd;
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -74,11 +75,21 @@ public class PlayerCtrl : MonoBehaviour
             spd = runMoveSpd;
         }
 
-        Vector3 amount = (moveDirect * spd * Time.deltaTime);
-
+        Vector3 amount = (targetDirect * spd * Time.deltaTime);
         collisionFlags = characterCtrl.Move(amount);
     }
 
+    void BodyDirectChange()
+    {
+        if (GetVelocitySpd() > 0.0f)
+        {
+            Vector3 newForward = characterCtrl.velocity;
+            newForward.y = 0.0f;
+
+            transform.forward = Vector3.Lerp(transform.forward, newForward, bodyRotateSpd * Time.deltaTime);
+
+        }
+    }
     float GetVelocitySpd()
     {
         if (characterCtrl.velocity == Vector3.zero)
@@ -92,34 +103,6 @@ public class PlayerCtrl : MonoBehaviour
             currentVelocitySpd = Vector3.Lerp(currentVelocitySpd, retVelocity, velocityChangeSpd * Time.fixedDeltaTime);
         }
         return currentVelocitySpd.magnitude;
-    }
-
-    private void OnGUI()
-    {
-        var labelStyle = new GUIStyle
-        {
-            fontSize = 200
-        };
-        labelStyle.normal.textColor = Color.white;
-        if (Input.GetKey(KeyCode.Escape))
-        {
-            if (GUI.Button(new Rect(800, 400, 200, 100), "Exit", labelStyle))
-            {
-                Application.Quit();
-            }
-        }
-
-    }
-
-    void BodyDirectChange()
-    {
-        if (GetVelocitySpd() > 0.0f)
-        {
-            Vector3 newForward = characterCtrl.velocity;
-            newForward.y = 0;
-
-            transform.forward = Vector3.Lerp(transform.forward, newForward, bodyRotateSpd * Time.deltaTime);
-        }
     }
 
     void CkAnimationState()
@@ -233,17 +216,17 @@ public class PlayerCtrl : MonoBehaviour
                 break;
         }
     }
-    public void PickUpEnd()
+    void PickUpEnd()
     {
         playerState = PlayerState.Idle;
         animator.SetBool("isPick", false);
     }
-    public void AtkEnd()
+    void AtkEnd()
     {
         animator.SetBool("isAtk", false);
         playerState = PlayerState.Idle;
     }
-    public void PunchEnd()
+    void PunchEnd()
     {
         animator.SetBool("isPunch", false);
         playerState = PlayerState.Idle;
