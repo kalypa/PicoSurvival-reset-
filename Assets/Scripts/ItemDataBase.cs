@@ -9,5 +9,5 @@ public class ItemDataBase : MonoBehaviour
     {
         instance = this;
     }
-    public List<Item1> itemDB = new List<Item1>();
+    public List<Item> itemDB = new List<Item>();
 }

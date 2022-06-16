@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 public class Slot : MonoBehaviour
 {
-    public Item1 item;
+    public Item item;
     public int itemCount;
     public Image itemIcon;
     [SerializeField]
@@ -23,7 +23,7 @@ public class Slot : MonoBehaviour
     public void UpdateSlotUI()
     {
         itemIcon.sprite = item.itemImage;
-        if (item.itemType != Item1.ItemType.weapon)
+        if (item.itemType != Item.ItemType.weapon)
         {
             goCountImage.SetActive(true);
             itemCount++;

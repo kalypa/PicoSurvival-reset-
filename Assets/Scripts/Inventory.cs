@@ -17,7 +17,7 @@ public class Inventory : MonoBehaviour
         instance = this;
     }
     #endregion
-    public List<Item1> item = new();
+    public List<Item> item = new();
     public delegate void OnSlotItem();
     public OnSlotItem onSlotItem;
     private bool fdown;
@@ -28,10 +28,11 @@ public class Inventory : MonoBehaviour
     public bool[] hasweapon;
     public bool[] hasItem;
     private PlayerCtrl player;
-
+    private Slot slot;
     private void Start()
     {
         player = GetComponent<PlayerCtrl>();
+        slot = FindObjectOfType<Slot>();
     }
     void Update()
     {
@@ -40,7 +41,7 @@ public class Inventory : MonoBehaviour
         Swap();
     }
 
-    public bool AddItem(Item1 _item)
+    public bool AddItem(Item _item)
     {
         if (item.Count < 19)
         {
@@ -82,16 +83,20 @@ public class Inventory : MonoBehaviour
         if (fdown && nearObject != null)
         {
             player.playerState = PlayerCtrl.PlayerState.PickUp;
-            Item1 item = nearObject.GetComponent<Item1>();
+            Item item = nearObject.GetComponent<Item>();
             if (nearObject.CompareTag("Weapon"))
             {
                 int weaponIndex = item.value;
+                AddItem(item);
                 hasweapon[weaponIndex] = true;
             }
             else if (nearObject.CompareTag("Ingredient") || nearObject.CompareTag("Food"))
             {
                 int itemIndex = item.value;
-                AddItem(item);
+                if(slot.itemCount == 0)
+                {
+                    AddItem(item);
+                }
                 hasItem[itemIndex] = true;
             }
             Destroy(nearObject);
