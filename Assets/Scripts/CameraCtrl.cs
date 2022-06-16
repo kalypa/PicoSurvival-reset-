@@ -4,60 +4,53 @@ using UnityEngine;
 
 public class CameraCtrl : MonoBehaviour
 {
-    private Transform _cameraTransform = null;
-    public GameObject _objTarget = null;
-    private Transform _objTargetTransform = null;
+    public Transform objectTarget;
+    public float followSpd = 10f;
+    public float sensitivity = 100f;
+    public float clampAngle = 70f;
 
-    public float _distance = 3;
+    private float rotX;
+    private float rotY;
 
-    public float _height = 1.75f;
-
-    public float _heightDamp = 6.0f;
-    public float _rotateDamp = 6.0f;
-    private void LateUpdate()
-    {
-        if (_objTarget == null)
-        {
-            return;
-        }
-
-        if (_objTargetTransform == null)
-        {
-            _objTargetTransform = _objTarget.transform;
-        }
-
-        ThirdCamera();
-
-    }
-
+    public Transform realCamera;
+    public Vector3 dirNormalized;
+    public Vector3 lastDir;
+    public float minDistance;
+    public float maxDistance;
+    public float lastDistance;
+    public float smoothness = 10f;
     void Start()
     {
-        _cameraTransform = GetComponent<Transform>();
-
-        if (_objTarget != null)
-        {
-            _objTargetTransform = _objTarget.GetComponent<Transform>();
-        }
+        rotX = transform.localRotation.eulerAngles.x;
+        rotY = transform.localRotation.eulerAngles.y;
+        dirNormalized = realCamera.localPosition.normalized;
+        lastDistance = realCamera.localPosition.magnitude;
     }
-    /// <summary>
-    /// 3ÀÎÄª Ä«¸Þ¶ó
-    /// </summary>
-    void ThirdCamera()
+
+    void Update()
     {
-        float objTargetRotationAngle = _objTargetTransform.eulerAngles.y;
-        float objHeight = _objTargetTransform.position.y + _height;
+        rotX += -(Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime);
+        rotY += Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
 
-        float nowRotationAngle = _cameraTransform.eulerAngles.y;
-        float nowHeight = _cameraTransform.position.y;
+        rotX = Mathf.Clamp(rotX, -clampAngle, clampAngle);
+        Quaternion rot = Quaternion.Euler(rotX, rotY, 0);
+        transform.rotation = rot;
+    }
 
-        nowRotationAngle = Mathf.LerpAngle(nowRotationAngle, objTargetRotationAngle, _rotateDamp * Time.deltaTime);
-        nowHeight = Mathf.Lerp(nowHeight, objHeight, _heightDamp * Time.deltaTime);
-        Quaternion nowRotation = Quaternion.Euler(0, nowRotationAngle, 0);
+    void LateUpdate()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, objectTarget.position, followSpd * Time.deltaTime);
+        lastDir = transform.TransformPoint(dirNormalized * maxDistance);
+        RaycastHit hit;
 
-        _cameraTransform.position = _objTargetTransform.position;
-        _cameraTransform.position -= nowRotation * Vector3.forward * _distance;
-
-        _cameraTransform.position = new Vector3(_cameraTransform.position.x, nowHeight, _cameraTransform.position.z);
-        _cameraTransform.LookAt(_objTargetTransform);
+        if(Physics.Linecast(transform.position, lastDir, out hit))
+        {
+            lastDistance = Mathf.Clamp(hit.distance, minDistance, maxDistance);
+        }
+        else
+        {
+            lastDistance = maxDistance;
+        }
+        realCamera.localPosition = Vector3.Lerp(realCamera.localPosition, dirNormalized * lastDistance, Time.deltaTime * smoothness);
     }
 }

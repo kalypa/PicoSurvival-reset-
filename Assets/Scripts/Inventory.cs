@@ -82,7 +82,8 @@ public class Inventory : MonoBehaviour
     {
         if (fdown && nearObject != null)
         {
-            player.playerState = PlayerCtrl.PlayerState.PickUp;
+            player.animator.SetBool("isPick", true);
+            //player.playerState = PlayerCtrl.PlayerState.PickUp;
             Item item = nearObject.GetComponent<Item>();
             if (nearObject.CompareTag("Weapon"))
             {

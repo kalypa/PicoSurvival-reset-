@@ -7,7 +7,7 @@ public class PlayerCtrl : MonoBehaviour
     public float movespd = 2.0f;
     public float runMoveSpd = 3.5f;
     public float directRotateSpd = 100.0f;
-    public float bodyRotateSpd = 2.0f;
+    public float bodyRotateSpd = 5.0f;
     public float velocityChangeSpd = 0.1f;
     private Vector3 currentVelocitySpd = Vector3.zero;
     private Vector3 moveDirect = Vector3.zero;
@@ -18,7 +18,7 @@ public class PlayerCtrl : MonoBehaviour
     public SphereCollider AtkSphereCollider = null;
     private readonly float gravity = 9.8f;
     public float verticalSpd = 0;
-    private Animator animator = null;
+    public Animator animator = null;
     public enum PlayerState { None, Idle, Walk, Run, Charge, Atk, PickUp}
     public enum AtkState { None, Punch, Sword, Axe, PickAxe }
     public PlayerState playerState = PlayerState.None;
@@ -26,8 +26,11 @@ public class PlayerCtrl : MonoBehaviour
     public bool flagNextAttack = false;
     private Inventory inventory;
     private InventoryUI UI;
+    private float smoothness = 10f;
+    Camera _camera;
     void Start()
     {
+        _camera = Camera.main;
         UI = GetComponent<InventoryUI>();
         characterCtrl = GetComponent<CharacterController>();
 
@@ -42,11 +45,13 @@ public class PlayerCtrl : MonoBehaviour
     {
         Move();
         SetGravity();
-        CkAnimationState();
-        BodyDirectChange();
         InputAttackCtrll();
-        AtkAnimationCtrl();
-        AtkComponentCtrl();
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 playerDir = Vector3.Scale(_camera.transform.forward, new Vector3(1, 0, 1));
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(playerDir), Time.deltaTime * smoothness);
     }
 
     void Move()
@@ -60,134 +65,61 @@ public class PlayerCtrl : MonoBehaviour
         Vector3 forward = CameraTransform.TransformDirection(Vector3.forward);
         forward.y = 0.0f;
 
-        Vector3 right = new Vector3(forward.z, 0.0f, -forward.x);
+        Vector3 right = CameraTransform.TransformDirection(Vector3.right);
         float vertical = Input.GetAxisRaw("Vertical");
         float horizontal = Input.GetAxisRaw("Horizontal");
 
         Vector3 targetDirect = horizontal * right + vertical * forward;
-
-        moveDirect = Vector3.RotateTowards(moveDirect, targetDirect, directRotateSpd * Mathf.Deg2Rad * Time.deltaTime, 1000.0f);
-        moveDirect = moveDirect.normalized;
         float spd = movespd;
-
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.W))
         {
             spd = runMoveSpd;
+            animator.SetFloat("MoveSpd", 1f);
         }
-
-        Vector3 amount = (targetDirect * spd * Time.deltaTime);
-        collisionFlags = characterCtrl.Move(amount);
-    }
-
-    void BodyDirectChange()
-    {
-        if (GetVelocitySpd() > 0.0f)
+        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
         {
-            Vector3 newForward = characterCtrl.velocity;
-            newForward.y = 0.0f;
-
-            transform.forward = Vector3.Lerp(transform.forward, newForward, bodyRotateSpd * Time.deltaTime);
-
+            animator.SetFloat("MoveSpd", 0.1f);
         }
-    }
-    float GetVelocitySpd()
-    {
-        if (characterCtrl.velocity == Vector3.zero)
+        else if(Input.GetKey(KeyCode.A))
         {
-            currentVelocitySpd = Vector3.zero;
+            animator.SetFloat("LeftMoveSpd", 0.1f);
+        }
+        else if(Input.GetKey(KeyCode.D))
+        {
+            animator.SetFloat("RightMoveSpd", 0.1f);
         }
         else
         {
-            Vector3 retVelocity = characterCtrl.velocity;
-            retVelocity.y = 0;
-            currentVelocitySpd = Vector3.Lerp(currentVelocitySpd, retVelocity, velocityChangeSpd * Time.fixedDeltaTime);
+            animator.SetFloat("MoveSpd", 0.0f);
+            animator.SetFloat("LeftMoveSpd", 0.0f);
+            animator.SetFloat("RightMoveSpd", 0.0f);
+            animator.SetFloat("BackMoveSpd", 0.0f);
         }
-        return currentVelocitySpd.magnitude;
+
+        Vector3 amount = (targetDirect.normalized * spd * Time.deltaTime);
+        collisionFlags = characterCtrl.Move(amount);
     }
 
-    void CkAnimationState()
-    {
-        float nowspd = GetVelocitySpd();
-
-        switch (playerState)
-        {
-            case PlayerState.None:
-                break;
-            case PlayerState.Idle:
-                animator.SetFloat("MoveSpd", 0.0f);
-                if (nowspd > 0.0f)
-                {
-                    playerState = PlayerState.Walk;
-                }
-                break;
-            case PlayerState.Walk:
-                animator.SetFloat("MoveSpd", 0.1f);
-                if (Input.GetKeyDown(KeyCode.LeftShift))
-                {
-                    playerState = PlayerState.Charge;
-                }
-                else if (nowspd < 0.01f)
-                {
-                    playerState = PlayerState.Idle;
-                }
-                break;
-            case PlayerState.Charge:
-                animator.SetFloat("MoveSpd", 1f);
-                if (nowspd < 0.5f || Input.GetKeyUp(KeyCode.LeftShift))
-                {
-                    playerState = PlayerState.Walk;
-                }
-
-                if (nowspd < 0.01f)
-                {
-                    playerState = PlayerState.Idle;
-                }
-                break;
-            case PlayerState.Atk: 
-                break;
-            case PlayerState.PickUp:
-                animator.SetBool("isPick", true);
-                break;
-            default:
-                break;
-        }
-    }
-
-    void AtkAnimationCtrl()
-    {
-        switch (atkState)
-        {
-            case AtkState.Punch:
-                if (playerState == PlayerState.Atk)
-                    animator.SetBool("isPunch", true);
-                break;
-            case AtkState.Axe:
-                if(playerState == PlayerState.Atk)
-                animator.SetBool("isAtk", true);
-                break;
-        }
-    }
     void InputAttackCtrll()
     {
-        //if (UI.inventory == false)
-        //{
-            if (Input.GetMouseButtonDown(0) == true)
+        if (Input.GetMouseButtonDown(0) == true)
+        {
+            if (inventory.hasweapon[0] == true)
             {
-                if (playerState != PlayerState.Atk)
-                {
-                    playerState = PlayerState.Atk;
-                    if (inventory.hasweapon[0] == true)
-                    {
-                        atkState = AtkState.Axe;
-                    }
-                    else
-                    {
-                        atkState = AtkState.Punch;
-                    }
-                }
-                Debug.Log(atkState);
+                animator.SetBool("isAtk", true);
+                AtkCapsuleCollider.enabled = true;
             }
-        //}
+            else
+            {
+                animator.SetBool("isPunch", true);
+                AtkSphereCollider.enabled = true;
+            }
+        }
+        else
+        {
+            AtkCapsuleCollider.enabled = false;
+            AtkSphereCollider.enabled = false;
+        }
     }
 
     void SetGravity()
@@ -201,34 +133,16 @@ public class PlayerCtrl : MonoBehaviour
             verticalSpd -= gravity * Time.deltaTime;
         }
     }
-
-    void AtkComponentCtrl()
-    {
-        switch (playerState)
-        {
-            case PlayerState.Atk:
-                AtkCapsuleCollider.enabled = true;
-                AtkSphereCollider.enabled = true;
-                break;
-            default:
-                AtkCapsuleCollider.enabled = false;
-                AtkSphereCollider.enabled = false;
-                break;
-        }
-    }
     void PickUpEnd()
     {
-        playerState = PlayerState.Idle;
         animator.SetBool("isPick", false);
     }
     void AtkEnd()
     {
         animator.SetBool("isAtk", false);
-        playerState = PlayerState.Idle;
     }
     void PunchEnd()
     {
         animator.SetBool("isPunch", false);
-        playerState = PlayerState.Idle;
     }
 }
