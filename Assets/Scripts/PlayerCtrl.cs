@@ -9,8 +9,6 @@ public class PlayerCtrl : MonoBehaviour
     public float directRotateSpd = 100.0f;
     public float bodyRotateSpd = 5.0f;
     public float velocityChangeSpd = 0.1f;
-    private Vector3 currentVelocitySpd = Vector3.zero;
-    private Vector3 moveDirect = Vector3.zero;
     public bool stopMove = false;
     private CharacterController characterCtrl = null;
     private CollisionFlags collisionFlags = CollisionFlags.None;
@@ -25,19 +23,23 @@ public class PlayerCtrl : MonoBehaviour
     public AtkState atkState = AtkState.None;
     public bool flagNextAttack = false;
     private Inventory inventory;
-    private InventoryUI UI;
     private float smoothness = 10f;
+    private bool isSit = false;
+    [SerializeField]
+    private Transform followCamera;
+    public float playerHP = 100;
     Camera _camera;
+    private DinosaurCtrl rapter;
     void Start()
     {
         _camera = Camera.main;
-        UI = GetComponent<InventoryUI>();
         characterCtrl = GetComponent<CharacterController>();
 
         animator = GetComponent<Animator>();
 
         playerState = PlayerState.Idle;
         inventory = GetComponent<Inventory>();
+        rapter = GetComponent<DinosaurCtrl>();
     }
 
 
@@ -48,10 +50,18 @@ public class PlayerCtrl : MonoBehaviour
         InputAttackCtrll();
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
         Vector3 playerDir = Vector3.Scale(_camera.transform.forward, new Vector3(1, 0, 1));
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(playerDir), Time.deltaTime * smoothness);
+        if (isSit == true)
+        {
+            followCamera.localPosition = new Vector3(0, 0.6f, 0);
+        }
+        else
+        {
+            followCamera.localPosition = new Vector3(0, 1f, 0);
+        }
     }
 
     void Move()
@@ -60,7 +70,6 @@ public class PlayerCtrl : MonoBehaviour
         {
             return;
         }
-
         Transform CameraTransform = Camera.main.transform;
         Vector3 forward = CameraTransform.TransformDirection(Vector3.forward);
         forward.y = 0.0f;
@@ -78,22 +87,76 @@ public class PlayerCtrl : MonoBehaviour
         }
         else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
         {
-            animator.SetFloat("MoveSpd", 0.1f);
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                spd = movespd * 0.5f;
+                isSit = !isSit;
+                animator.SetBool("isSit", isSit);
+                animator.SetBool("isSitMove_F", isSit);
+            }
+            else if(isSit == true)
+            {
+                spd = movespd * 0.5f;
+                animator.SetBool("isSitMove_F", true);
+            }
+            else if(isSit == false)
+            {
+                animator.SetFloat("MoveSpd", 0.1f);
+            }
         }
-        else if(Input.GetKey(KeyCode.A))
+        else if (Input.GetKey(KeyCode.A))
         {
-            animator.SetFloat("LeftMoveSpd", 0.1f);
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                spd = movespd * 0.5f;
+                isSit = !isSit;
+                animator.SetBool("isSit", isSit);
+                animator.SetBool("isSitMove_L", isSit);
+            }
+            else if (isSit == true)
+            {
+                spd = movespd * 0.5f;
+                animator.SetBool("isSitMove_L", true);
+            }
+            else if(isSit == false)
+            {
+                spd = movespd * 0.8f;
+                animator.SetFloat("LeftMoveSpd", 0.1f);
+            }
         }
-        else if(Input.GetKey(KeyCode.D))
+        else if (Input.GetKey(KeyCode.D))
         {
-            animator.SetFloat("RightMoveSpd", 0.1f);
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                spd = movespd * 0.5f;
+                isSit = !isSit;
+                animator.SetBool("isSit", isSit);
+                animator.SetBool("isSitMove_R", isSit);
+            }
+            else if (isSit == true)
+            {
+                spd = movespd * 0.5f;
+                animator.SetBool("isSitMove_R", true);
+            }
+            else if(isSit == false)
+            {
+                spd = movespd * 0.8f;
+                animator.SetFloat("RightMoveSpd", 0.1f);
+            }
         }
         else
         {
-            animator.SetFloat("MoveSpd", 0.0f);
-            animator.SetFloat("LeftMoveSpd", 0.0f);
-            animator.SetFloat("RightMoveSpd", 0.0f);
-            animator.SetFloat("BackMoveSpd", 0.0f);
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                isSit = !isSit;
+                animator.SetBool("isSit", isSit);
+            }
+            animator.SetBool("isSitMove_F", false);
+            animator.SetBool("isSitMove_L", false);
+            animator.SetBool("isSitMove_R", false);
+            animator.SetFloat("MoveSpd", 0f);
+            animator.SetFloat("LeftMoveSpd", 0f);
+            animator.SetFloat("RightMoveSpd", 0f);
         }
 
         Vector3 amount = (targetDirect.normalized * spd * Time.deltaTime);
@@ -132,6 +195,10 @@ public class PlayerCtrl : MonoBehaviour
         {
             verticalSpd -= gravity * Time.deltaTime;
         }
+    }
+
+    void Damaged()
+    {
     }
     void PickUpEnd()
     {
