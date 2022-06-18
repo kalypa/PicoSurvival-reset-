@@ -4,125 +4,60 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    #region Singleton
-    public static Inventory instance;
+    public static bool isTab = false;
+    [SerializeField]
+    private GameObject inventoryBase;
+    [SerializeField]
+    private GameObject SlotParent;
 
-    private void Awake()
+    private Slot[] slot;
+
+    void Start()
     {
-        if(instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        instance = this;
+        slot = SlotParent.GetComponentsInChildren<Slot>();
     }
-    #endregion
-    public List<Item> item = new();
-    public delegate void OnSlotItem();
-    public OnSlotItem onSlotItem;
-    private bool fdown;
-    private bool onedown;
-    private bool zerodown;
-    public GameObject nearObject;
-    public GameObject[] weapon;
-    public bool[] hasweapon;
-    public bool[] hasItem;
-    private PlayerCtrl player;
-    private Slot slot;
-    private void Start()
-    {
-        player = GetComponent<PlayerCtrl>();
-        slot = FindObjectOfType<Slot>();
-    }
+
     void Update()
     {
-        Interation();
-        GetInput();
-        Swap();
+        TryOpenInventory();
     }
 
-    public bool AddItem(Item _item)
+    private void TryOpenInventory()
     {
-        if (item.Count < 19)
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
-            item.Add(_item);
-            if (onSlotItem != null)
-            {
-                onSlotItem.Invoke();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Weapon"))
-        {
-            nearObject = other.gameObject;
-        }
-        else if (other.CompareTag("Ingredient"))
-        {
-            nearObject = other.gameObject;
+            isTab = !isTab;
+            inventoryBase.SetActive(isTab);
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    public void AcquireItem(Item _item, int _count = 1)
     {
-        if (other.CompareTag("Weapon"))
+        if(_item.itemType != Item.ItemType.weapon)
         {
-            nearObject = null;
-        }
-        else if (other.CompareTag("Ingredient"))
-        {
-            nearObject = null;
-        }
-    }
-    void Interation()
-    {
-        if (fdown && nearObject != null)
-        {
-            player.animator.SetBool("isPick", true);
-            Item item = nearObject.GetComponent<Item>();
-            if (nearObject.CompareTag("Weapon"))
+            for (int i = 0; i < slot.Length; i++)
             {
-                int weaponIndex = item.value;
-                AddItem(item);
-                hasweapon[weaponIndex] = true;
-            }
-            else if (nearObject.CompareTag("Ingredient") || nearObject.CompareTag("Food"))
-            {
-                int itemIndex = item.value;
-                if(slot.itemCount == 0)
+                if (slot[i].item != null)
                 {
-                    AddItem(item);
+                    if (slot[i].item.itemName == _item.itemName)
+                    {
+                        slot[i].SetSlotCount(_count);
+                        return;
+                    }
                 }
-                hasItem[itemIndex] = true;
             }
-            Destroy(nearObject);
         }
-    }
-    void Swap()
-    {
-        int weaponIndex = -1;
-        if (onedown)
+
+        for (int i = 0; i < slot.Length; i++)
         {
-            weaponIndex = 0;
+            if (_item != null)
+            {
+                if (slot[i].item == null)
+                {
+                    slot[i].AddItem(_item,_count);
+                    return;
+                }
+            }
         }
-        if (onedown && hasweapon[weaponIndex] == true)
-        {
-            weapon[weaponIndex].SetActive(true);
-        }
-        if (zerodown)
-        {
-            weaponIndex = 0;
-            weapon[weaponIndex].SetActive(false);
-        }
-    }
-    void GetInput()
-    {
-        fdown = Input.GetKeyDown(KeyCode.F);
-        zerodown = Input.GetKeyDown(KeyCode.Alpha0);
-        onedown = Input.GetKeyDown(KeyCode.Alpha1);
     }
 }

@@ -8,6 +8,8 @@ TagManager:
   - PlayerAtk
   - Dinosaur
   - Ingredient
+  - EnemyAtk
+  - Item
   layers:
   - Default
   - TransparentFX
@@ -16,7 +18,7 @@ TagManager:
   - Water
   - UI
   - Enemy
-  - 
+  - Item
   - 
   - 
   - 

@@ -13,6 +13,14 @@ public class Slot : MonoBehaviour
     [SerializeField]
     private GameObject goCountImage;
 
+    public void AddItem(Item _item, int _count = 1)
+    {
+        item = _item;
+        itemCount = _count;
+        itemIcon.sprite = item.itemImage;
+        goCountImage.SetActive(true);
+        countText.text = itemCount.ToString(); 
+    }
     private void SetColor(float _alpha)
     {
         Color color = itemIcon.color;

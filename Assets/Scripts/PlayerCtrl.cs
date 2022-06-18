@@ -17,11 +17,6 @@ public class PlayerCtrl : MonoBehaviour
     private readonly float gravity = 9.8f;
     public float verticalSpd = 0;
     public Animator animator = null;
-    public enum PlayerState { None, Idle, Walk, Run, Charge, Atk, PickUp}
-    public enum AtkState { None, Punch, Sword, Axe, PickAxe }
-    public PlayerState playerState = PlayerState.None;
-    public AtkState atkState = AtkState.None;
-    public bool flagNextAttack = false;
     private Inventory inventory;
     private float smoothness = 10f;
     private bool isSit = false;
@@ -29,17 +24,18 @@ public class PlayerCtrl : MonoBehaviour
     private Transform followCamera;
     public float playerHP = 100;
     Camera _camera;
+    [SerializeField]
     private DinosaurCtrl rapter;
+    private Rigidbody rigid;
     void Start()
     {
         _camera = Camera.main;
         characterCtrl = GetComponent<CharacterController>();
 
         animator = GetComponent<Animator>();
-
-        playerState = PlayerState.Idle;
         inventory = GetComponent<Inventory>();
         rapter = GetComponent<DinosaurCtrl>();
+        rigid = GetComponent<Rigidbody>();
     }
 
 
@@ -48,6 +44,7 @@ public class PlayerCtrl : MonoBehaviour
         Move();
         SetGravity();
         InputAttackCtrll();
+        Debug.Log(playerHP);
     }
 
     void LateUpdate()
@@ -167,16 +164,8 @@ public class PlayerCtrl : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) == true)
         {
-            if (inventory.hasweapon[0] == true)
-            {
-                animator.SetBool("isAtk", true);
-                AtkCapsuleCollider.enabled = true;
-            }
-            else
-            {
-                animator.SetBool("isPunch", true);
-                AtkSphereCollider.enabled = true;
-            }
+            animator.SetBool("isPunch", true);
+            AtkSphereCollider.enabled = true;
         }
         else
         {
@@ -197,8 +186,28 @@ public class PlayerCtrl : MonoBehaviour
         }
     }
 
-    void Damaged()
+    IEnumerator Damaged()
     {
+        playerHP -= 20;
+        yield return  new WaitForSeconds(0.1f);
+        if(playerHP > 0)
+        {
+            animator.SetBool("isDamaged", true);
+        }
+        else
+        {
+            Debug.Log("Dead");
+            animator.Play("Dead");
+            yield return new WaitForSeconds(1f);
+            gameObject.SetActive(false);
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("EnemyAtk") == true)
+        {
+            StartCoroutine(Damaged());
+        }
     }
     void PickUpEnd()
     {
@@ -211,5 +220,9 @@ public class PlayerCtrl : MonoBehaviour
     void PunchEnd()
     {
         animator.SetBool("isPunch", false);
+    }
+    void DamagedEnd()
+    {
+        animator.SetBool("isDamaged", false);
     }
 }
