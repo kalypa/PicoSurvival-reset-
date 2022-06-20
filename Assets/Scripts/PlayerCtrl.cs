@@ -23,10 +23,13 @@ public class PlayerCtrl : MonoBehaviour
     [SerializeField]
     private Transform followCamera;
     public float playerHP = 100;
+    private bool isGun = false;
     Camera _camera;
     [SerializeField]
     private DinosaurCtrl rapter;
     private Rigidbody rigid;
+    [SerializeField]
+    private GameObject gun;
     void Start()
     {
         _camera = Camera.main;
@@ -44,6 +47,7 @@ public class PlayerCtrl : MonoBehaviour
         Move();
         SetGravity();
         InputAttackCtrll();
+        Swap();
         Debug.Log(playerHP);
     }
 
@@ -162,7 +166,7 @@ public class PlayerCtrl : MonoBehaviour
 
     void InputAttackCtrll()
     {
-        if (Input.GetMouseButtonDown(0) == true)
+        if (Input.GetMouseButtonDown(0) == true && isGun == false)
         {
             animator.SetBool("isPunch", true);
             AtkSphereCollider.enabled = true;
@@ -174,6 +178,15 @@ public class PlayerCtrl : MonoBehaviour
         }
     }
 
+    void Swap()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            isGun = !isGun;
+            animator.SetBool("isGun", isGun);
+            gun.SetActive(isGun);
+        }
+    }
     void SetGravity()
     {
         if ((collisionFlags & CollisionFlags.CollidedBelow) != 0)
