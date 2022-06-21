@@ -20,4 +20,5 @@ public class Gun : MonoBehaviour
     public Animator animator;
     public ParticleSystem muzzleFlash;
     public AudioClip fire_Sound;
+    public AudioClip empty_Sound;
 }

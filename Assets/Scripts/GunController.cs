@@ -9,9 +9,10 @@ public class GunController : MonoBehaviour
 
     private float currentFireRate;
 
+    private AudioSource audioSource;
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -30,7 +31,7 @@ public class GunController : MonoBehaviour
 
     private void TryFire()
     {
-        if(Input.GetMouseButton(0) && currentFireRate <= 0)
+        if(Input.GetButton("Fire1") && currentFireRate <= 0)
         {
             currentGun.animator.SetTrigger("isShoot");
             Fire();
@@ -39,12 +40,35 @@ public class GunController : MonoBehaviour
 
     private void Fire()
     {
-        currentFireRate = currentGun.fireRate;
-        Shoot();
+        if(currentGun.currentBulletCount > 0)
+        {
+            Shoot();
+        }
+        else
+        {
+            PlaySound(currentGun.empty_Sound);
+        }
     }
 
     private void Shoot()
     {
+        currentGun.currentBulletCount--;
+        currentFireRate = currentGun.fireRate;
         currentGun.muzzleFlash.Play();
+        PlaySound(currentGun.fire_Sound);
+    }
+
+    private void Reload()
+    {
+        if(currentGun.carryBulletCount > 0)
+        {
+            currentGun.animator.SetTrigger("Reload");
+        }
+    }
+
+    private void PlaySound(AudioClip _clip)
+    {
+        audioSource.clip = _clip;
+        audioSource.Play();
     }
 }

@@ -83,26 +83,57 @@ public class PlayerCtrl : MonoBehaviour
         float spd = movespd;
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.W))
         {
-            spd = runMoveSpd;
-            animator.SetFloat("MoveSpd", 1f);
+            if(isGun == false)
+            {
+                spd = runMoveSpd;
+                animator.SetFloat("MoveSpd", 1f);
+            }
+            else if(isGun == true)
+            {
+                spd = runMoveSpd;
+                animator.SetFloat("GunMoveSpd", 1f);
+            }
         }
         else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
         {
-            if (Input.GetKeyDown(KeyCode.C))
+            if (isGun == false)
             {
-                spd = movespd * 0.5f;
-                isSit = !isSit;
-                animator.SetBool("isSit", isSit);
-                animator.SetBool("isSitMove_F", isSit);
+                if (Input.GetKeyDown(KeyCode.C))
+                {
+                    spd = movespd * 0.5f;
+                    isSit = !isSit;
+                    animator.SetBool("isSit", isSit);
+                    animator.SetBool("isSitMove_F", isSit);
+                }
+                else if (isSit == true)
+                {
+                    spd = movespd * 0.5f;
+                    animator.SetBool("isSitMove_F", true);
+                }
+                else if (isSit == false)
+                {
+                    animator.SetFloat("MoveSpd", 0.1f);
+                }
             }
-            else if(isSit == true)
+            else if(isGun == true)
             {
-                spd = movespd * 0.5f;
-                animator.SetBool("isSitMove_F", true);
-            }
-            else if(isSit == false)
-            {
-                animator.SetFloat("MoveSpd", 0.1f);
+
+                if (Input.GetKeyDown(KeyCode.C))
+                {
+                    spd = movespd * 0.5f;
+                    isSit = !isSit;
+                    animator.SetBool("isSit", isSit);
+                    animator.SetBool("isGunSitMove_F", isSit);
+                }
+                else if (isSit == true)
+                {
+                    spd = movespd * 0.5f;
+                    animator.SetBool("isSitMove_F", true);
+                }
+                else if (isSit == false)
+                {
+                    animator.SetFloat("GunMoveSpd", 0.1f);
+                }
             }
         }
         else if (Input.GetKey(KeyCode.A))
@@ -158,6 +189,7 @@ public class PlayerCtrl : MonoBehaviour
             animator.SetFloat("MoveSpd", 0f);
             animator.SetFloat("LeftMoveSpd", 0f);
             animator.SetFloat("RightMoveSpd", 0f);
+            animator.SetFloat("GunMoveSpd", 0f);
         }
 
         Vector3 amount = (targetDirect.normalized * spd * Time.deltaTime);
