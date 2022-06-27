@@ -59,7 +59,7 @@ public class CraftManual : MonoBehaviour
     }
     private void Build()
     {
-        if(isPreview)
+        if(isPreview && preview.GetComponent<PreviewObject>().isBuild())
         {
             Instantiate(prefab, hit.point, Quaternion.identity);
             Destroy(preview);

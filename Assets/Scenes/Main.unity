@@ -5409,7 +5409,7 @@ MonoBehaviour:
   craftBox:
   - craftName: Box
     buildPrefab: {fileID: 5582574918671149637, guid: 53202aeb131161f43a7114bbbdaefcee, type: 3}
-    previewPrefab: {fileID: 5368496158579011383, guid: f598671b18e77f44f9da97297015c79c, type: 3}
+    previewPrefab: {fileID: 4855410880674493934, guid: 4767181f320b2f948b593d9482113f3a, type: 3}
   layerMask:
     serializedVersion: 2
     m_Bits: 256
