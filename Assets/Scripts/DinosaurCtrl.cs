@@ -12,7 +12,7 @@ public class DinosaurCtrl : MonoBehaviour
     public Transform targetTransform = null;
     public Vector3 posTarget = Vector3.zero;
 
-    private Animation rapterAnimation = null;
+    public Animation rapterAnimation = null;
     private Transform rapterTransform = null;
 
     public AnimationClip IdleAnimClip = null;
@@ -23,12 +23,12 @@ public class DinosaurCtrl : MonoBehaviour
 
     public int hp = 100;
     public float AtkRange = 1.5f;
-    public GameObject effectDamage = null;
-    public GameObject effectDie = null;
+    public ParticleSystem effectDamage;
+    public ParticleSystem effectDie;
 
     private Tweener effectTweener = null;
     private SkinnedMeshRenderer skinnedMeshRenderer = null;
-
+    public SphereCollider AtkSphereCollider;
 
     void OnAtkAnmationFinished()
     {
@@ -246,20 +246,21 @@ public class DinosaurCtrl : MonoBehaviour
         }
     }
 
-    void effectDamageTween()
+
+    void InputAttackCtrll()
     {
-        if (effectTweener != null && effectTweener.isComplete == false)
+        if (rapterState == RapterState.Atk)
         {
-            return;
+            AtkSphereCollider.enabled = true;
         }
-
-        Color colorTo = Color.red;
-
-        effectTweener = HOTween.To(skinnedMeshRenderer, 0.2f, new TweenParms().Prop("color", colorTo).Loops(1, LoopType.Yoyo).OnStepComplete(OnDamageTweenFinished));
+        else
+        {
+            AtkSphereCollider.enabled = false;
+        }
     }
 
-    void OnDamageTweenFinished()
+    public void effectDamageTween()
     {
-        skinnedMeshRenderer.material.color = Color.white;
+        effectDamage.Play();
     }
 }

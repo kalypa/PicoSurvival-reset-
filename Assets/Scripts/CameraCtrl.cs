@@ -19,6 +19,8 @@ public class CameraCtrl : MonoBehaviour
     public float maxDistance;
     public float lastDistance;
     public float smoothness = 10f;
+    [SerializeField]
+    private Gun gun;
     void Start()
     {
         rotX = transform.localRotation.eulerAngles.x;
@@ -51,6 +53,9 @@ public class CameraCtrl : MonoBehaviour
         {
             lastDistance = maxDistance;
         }
-        realCamera.localPosition = Vector3.Lerp(realCamera.localPosition, dirNormalized * lastDistance, Time.deltaTime * smoothness);
+        if(gun.isAiming == false)
+        {
+            realCamera.localPosition = Vector3.Lerp(realCamera.localPosition, dirNormalized * lastDistance, Time.deltaTime * smoothness);
+        }
     }
 }
