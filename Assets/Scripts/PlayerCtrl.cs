@@ -42,6 +42,14 @@ public class PlayerCtrl : MonoBehaviour
     private Gun gunScript;
     [SerializeField]
     private GameObject bulletText;
+    [SerializeField]
+    private GameObject Hpbar;
+    [SerializeField]
+    private GameObject Hpbar2;
+    [SerializeField]
+    private GameObject fullbar;
+    [SerializeField]
+    private CraftManual craft;
     void Start()
     {
         _camera = Camera.main;
@@ -176,7 +184,7 @@ public class PlayerCtrl : MonoBehaviour
 
     void InputAttackCtrll()
     {
-        if (Input.GetMouseButtonDown(0) == true && isGun == false)
+        if (Input.GetMouseButtonDown(0) == true && isGun == false && craft.craftUI == false)
         {
             if(isAxe == true)
             {
@@ -252,10 +260,20 @@ public class PlayerCtrl : MonoBehaviour
         yield return  new WaitForSeconds(0.1f);
         if(playerHP > 0)
         {
-            animator.SetBool("isDamaged", true);
+            Hpbar.transform.localEulerAngles = new Vector3(0, 0, Hpbar.transform.localEulerAngles.z - 75);
+            if(Hpbar.transform.localEulerAngles.z <= 0)
+            {
+                fullbar.SetActive(false);
+            }
+            else if (Hpbar.transform.localEulerAngles.z <= -50)
+            {
+                Hpbar2.SetActive(false);
+            }
+                animator.SetBool("isDamaged", true);
         }
         else
         {
+            Hpbar.SetActive(false);
             Debug.Log("Dead");
             animator.Play("Dead");
             yield return new WaitForSeconds(1f);

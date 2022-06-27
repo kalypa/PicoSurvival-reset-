@@ -17,7 +17,7 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        Vector3 vecSpawn = new Vector3(Random.Range(10, 100), 1f, Random.Range(10, 100));
+        Vector3 vecSpawn = new Vector3(Random.Range(10, 50), 1f, Random.Range(10, 50));
 
         Ray ray = new Ray(vecSpawn, Vector3.down);
 
