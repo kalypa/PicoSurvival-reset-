@@ -27,6 +27,8 @@ public class CraftManual : MonoBehaviour
     private Transform player;
     [SerializeField]
     private Inventory inven;
+    [SerializeField]
+    private GameObject scarceText;
     public void SlotClick(int slotNum)
     {
         preview = Instantiate(craftBox[slotNum].previewPrefab, player.position + player.forward, Quaternion.identity);
@@ -50,10 +52,18 @@ public class CraftManual : MonoBehaviour
         {
             PreviewPositionUpdate();
         }
-        if(Input.GetButtonDown("Fire1") && isPreview && inven.slot[0].itemCount >= 9)
+        if(Input.GetButtonDown("Fire1") && isPreview)
         {
-            Build();
+            if(inven.slot[0].itemCount >= 9)
+            {
+                Build();
+            }
+            else
+            {
+                StartCoroutine(Scarce());
+            }
         }
+
         if (Input.GetMouseButtonDown(1))
         {
             Cancel();
@@ -94,5 +104,11 @@ public class CraftManual : MonoBehaviour
                 preview.transform.position = location;
             }
         }
+    }
+    private IEnumerator Scarce()
+    {
+        scarceText.SetActive(true);
+        yield return new WaitForSeconds(0.3f);
+        scarceText.SetActive(false);
     }
 }
