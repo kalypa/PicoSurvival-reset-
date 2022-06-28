@@ -50,6 +50,8 @@ public class PlayerCtrl : MonoBehaviour
     private GameObject fullbar;
     [SerializeField]
     private CraftManual craft;
+    [SerializeField]
+    private GameObject deadPanel;
     void Start()
     {
         _camera = Camera.main;
@@ -290,6 +292,8 @@ public class PlayerCtrl : MonoBehaviour
             animator.Play("Dead");
             yield return new WaitForSeconds(1f);
             gameObject.SetActive(false);
+            deadPanel.SetActive(true);
+            Time.timeScale = 0f;
         }
     }
     private void OnTriggerEnter(Collider other)
