@@ -52,6 +52,8 @@ public class PlayerCtrl : MonoBehaviour
     private CraftManual craft;
     [SerializeField]
     private GameObject deadPanel;
+    public AudioSource audioSource;
+    public AudioClip damageSound;
     void Start()
     {
         _camera = Camera.main;
@@ -283,7 +285,9 @@ public class PlayerCtrl : MonoBehaviour
             {
                 Hpbar2.SetActive(false);
             }
-                animator.SetBool("isDamaged", true);
+            audioSource.clip = damageSound;
+            audioSource.Play();
+            animator.SetBool("isDamaged", true);
         }
         else
         {
