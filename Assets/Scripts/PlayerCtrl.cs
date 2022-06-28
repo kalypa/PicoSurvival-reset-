@@ -184,7 +184,7 @@ public class PlayerCtrl : MonoBehaviour
 
     void InputAttackCtrll()
     {
-        if (Input.GetMouseButtonDown(0) == true && isGun == false && craft.craftUI == false)
+        if (Input.GetMouseButtonDown(0) == true && isGun == false)
         {
             if(isAxe == true)
             {
@@ -226,20 +226,32 @@ public class PlayerCtrl : MonoBehaviour
         {
             isAxe = !isAxe;
             animator.SetBool("isAxe", isAxe);
+            animator.SetBool("isPickAxe", false);
+            animator.SetBool("isGun", false);
             axe.SetActive(isAxe);
+            pickAxe.SetActive(false);
+            gun.SetActive(false);
         }
         else if(Input.GetKeyDown(KeyCode.Alpha2))
         {
             isPickAxe = !isPickAxe;
             animator.SetBool("isPickAxe", isPickAxe);
+            animator.SetBool("isAxe", false);
+            animator.SetBool("isGun", false);
             pickAxe.SetActive(isPickAxe);
+            axe.SetActive(false);
+            gun.SetActive(false);
         }
         else if(Input.GetKeyDown(KeyCode.Alpha3))
         {
             isGun = !isGun;
             bulletText.SetActive(isGun);
             animator.SetBool("isGun", isGun);
+            animator.SetBool("isAxe", false);
+            animator.SetBool("isPickAxe", false);
             gun.SetActive(isGun);
+            axe.SetActive(false);
+            pickAxe.SetActive(false);
         }
     }
     void SetGravity()
