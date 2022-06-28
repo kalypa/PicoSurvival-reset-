@@ -10,7 +10,7 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     private GameObject SlotParent;
 
-    private Slot[] slot;
+    public Slot[] slot;
 
     void Start()
     {

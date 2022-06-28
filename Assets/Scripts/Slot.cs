@@ -64,4 +64,8 @@ public class Slot : MonoBehaviour
         goCountImage.SetActive(false);
         countText.text = "0";
     }
+    void Update()
+    {
+        countText.text = itemCount.ToString();
+    }
 }

@@ -186,7 +186,7 @@ public class PlayerCtrl : MonoBehaviour
 
     void InputAttackCtrll()
     {
-        if (Input.GetMouseButtonDown(0) == true && isGun == false)
+        if (Input.GetMouseButtonDown(0) == true && isGun == false && craft.isPreview == false)
         {
             if(isAxe == true)
             {

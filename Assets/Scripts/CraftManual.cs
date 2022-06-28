@@ -11,7 +11,7 @@ public class Craft
 public class CraftManual : MonoBehaviour
 {
     private bool isActive = false;
-    private bool isPreview = false;
+    public bool isPreview = false;
     [SerializeField]
     public GameObject craftUI;
     [SerializeField]
@@ -25,6 +25,8 @@ public class CraftManual : MonoBehaviour
     private float range;
     [SerializeField]
     private Transform player;
+    [SerializeField]
+    private Inventory inven;
     public void SlotClick(int slotNum)
     {
         preview = Instantiate(craftBox[slotNum].previewPrefab, player.position + player.forward, Quaternion.identity);
@@ -48,7 +50,7 @@ public class CraftManual : MonoBehaviour
         {
             PreviewPositionUpdate();
         }
-        if(Input.GetButtonDown("Fire1") && isPreview)
+        if(Input.GetButtonDown("Fire1") && isPreview && inven.slot[0].itemCount >= 9)
         {
             Build();
         }
@@ -68,6 +70,7 @@ public class CraftManual : MonoBehaviour
             preview = null;
             prefab = null;
             craftUI.SetActive(false);
+            inven.slot[0].itemCount -= 9;
         }
     }
     private void Cancel()
